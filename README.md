@@ -1,4 +1,7 @@
-cyberoam
-========
+Cyberoam AutoLogin Client
+=========================
 
-Cyberoam AutoLogin Client created Using Qt
+To Compile this, you'll need Qt4 installed
+
+
+Compile it on any platform & it's ready to use :)
