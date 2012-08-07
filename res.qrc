@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/cyb">
+        <file>webclientportallogo.png</file>
+        <file>icon.png</file>
+    </qresource>
+</RCC>
