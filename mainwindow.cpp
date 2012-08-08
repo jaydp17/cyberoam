@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     tray = new QSystemTrayIcon(this);
     tray->setIcon(QIcon(":/cyb/icon.png"));
     tray->setToolTip("Cyberoam AutoLogin Client");
-    traymode = wait4logout = supressMessage = false;
+    traymode = wait4logout = supressMessage = gotReply = false;
 
     createActions();
     createTrayMenu();
@@ -46,6 +46,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     tm.setInterval(179*60*1000);
     connect(&tm,SIGNAL(timeout()),this,SLOT(callLogin()));
+
+    timeout.setInterval(5000);
+    connect(&timeout,SIGNAL(timeout()),this,SLOT(checkConnection()));
 
 }
 
@@ -74,7 +77,7 @@ void MainWindow::changeEvent(QEvent *ev)
 void MainWindow::closeEvent(QCloseEvent *ev)
 {
     if(ev->type() == QEvent::Close){
-        if(isLoggedin){
+        if(isLoggedin && gotReply){
             wait4logout = true;
             login(false);
             ev->ignore();
@@ -86,6 +89,7 @@ void MainWindow::closeEvent(QCloseEvent *ev)
 
 void MainWindow::readReply(QNetworkReply *rply)
 {
+    gotReply = true;
     if(rply->error() == QNetworkReply::NoError){
         QString response = QString::fromUtf8(rply->readAll());
         qDebug() << response;
@@ -138,7 +142,9 @@ void MainWindow::login(bool timer)
         credentials.addQueryItem("username",ui->user_field->text());
 
         req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+        gotReply = false;
         manager->post(req,credentials.encodedQuery());
+        timeout.start();
     } else {
         QUrl credentials;
         credentials.addQueryItem("mode","191");
@@ -146,7 +152,9 @@ void MainWindow::login(bool timer)
         credentials.addQueryItem("password",ui->pass_field->text());
 
         req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+        gotReply = false;
         manager->post(req,credentials.encodedQuery());
+        timeout.start();
         tm.stop();
         tm.start();
     }
@@ -161,6 +169,9 @@ void MainWindow::declareLoggedIN()
     isLoggedin = true;
     log_out->setEnabled(true);
     log_in->setEnabled(false);
+
+    ui->user_field->setEnabled(false);
+    ui->pass_field->setEnabled(false);
 }
 
 void MainWindow::declareLoggedOFF()
@@ -172,6 +183,9 @@ void MainWindow::declareLoggedOFF()
     isLoggedin = false;
     log_out->setEnabled(false);
     log_in->setEnabled(true);
+
+    ui->user_field->setEnabled(true);
+    ui->pass_field->setEnabled(true);
 }
 
 void MainWindow::createActions()
@@ -228,4 +242,18 @@ void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
     if(reason == QSystemTrayIcon::DoubleClick){
         this->showDialog();
     }
+}
+
+void MainWindow::checkConnection()
+{
+    if(!gotReply){
+        if(traymode){
+            tray->showMessage("Connection Error","Cyberoam didn't respond to the request",QSystemTrayIcon::Critical);
+        } else {
+            QMessageBox::critical(this,"Connection Error","Cyberoam didn't respond to the request");
+        }
+        isLoggedin = false;
+    }
+    timeout.stop();
+
 }

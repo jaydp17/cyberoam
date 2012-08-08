@@ -40,13 +40,14 @@ private slots:
     void showTrayMessage();
     void callLogin();
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
+    void checkConnection();
 
 private:
     Ui::MainWindow *ui;
     QUrl cyberoamURL;
     QNetworkAccessManager *manager;
     QNetworkRequest req;
-    bool isLoggedin, traymode, wait4logout, supressMessage;
+    bool isLoggedin, traymode, wait4logout, supressMessage, gotReply;
 
     QSystemTrayIcon *tray;
     QMenu *trayMenu;
@@ -54,7 +55,7 @@ private:
 
     int timeInterval;
     Dialog about_dialog;
-    QTimer tm;
+    QTimer tm, timeout;
     void createActions();
     void createTrayMenu();
 };
