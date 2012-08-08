@@ -6,6 +6,8 @@
 
 QT       += core gui network
 
+RC_FILE = cyberoam.rc
+
 TARGET = cyberoam
 TEMPLATE = app
 
