@@ -193,6 +193,7 @@ void MainWindow::createTrayMenu()
     trayMenu->addAction(about);
     trayMenu->addAction(quit);
     tray->setContextMenu(trayMenu);
+    connect(tray,SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 }
 
 void MainWindow::showDialog()
@@ -209,4 +210,11 @@ void MainWindow::showTrayMessage()
 void MainWindow::callLogin()
 {
     login(true);
+}
+
+void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    if(reason == QSystemTrayIcon::DoubleClick){
+        this->showDialog();
+    }
 }

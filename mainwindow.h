@@ -39,7 +39,7 @@ private slots:
     void showDialog();
     void showTrayMessage();
     void callLogin();
-
+    void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
     Ui::MainWindow *ui;
