@@ -61,7 +61,11 @@ void MainWindow::changeEvent(QEvent *ev)
             tray->show();
             traymode = true;
             QTimer::singleShot(250, this, SLOT(hide()));
-            QTimer::singleShot(1000,this,SLOT(showTrayMessage()));
+            QTimer::singleShot(600,this,SLOT(showTrayMessage()));
+        }
+
+        if(this->windowState() && !Qt::WindowMinimized){
+            traymode = false;
         }
     }
     QMainWindow::changeEvent(ev);
@@ -86,9 +90,15 @@ void MainWindow::readReply(QNetworkReply *rply)
         QString response = QString::fromUtf8(rply->readAll());
         qDebug() << response;
         if(response.contains("Make sure your password is correct")){
-            QMessageBox::critical(this,"Login failed","The system could not log you on.\nMake sure your password is correct.");
+            if(traymode)
+                tray->showMessage("Login failed","The system could not log you on.\nMake sure your password is correct.",QSystemTrayIcon::Critical);
+            else
+                QMessageBox::critical(this,"Login failed","The system could not log you on.\nMake sure your password is correct.");
         } else if(response.contains("Maximum",Qt::CaseInsensitive)){
-            QMessageBox::critical(this,"Login failed","You have reached Maximum Login Limit.");
+            if(traymode)
+                tray->showMessage("Login failed","You have reached Maximum Login Limit.",QSystemTrayIcon::Critical);
+            else
+                QMessageBox::critical(this,"Login failed","You have reached Maximum Login Limit.");
         } else if(response.contains("You have successfully logged in")){
             emit loggedin();
         } else if(response.contains("You have successfully logged off")){
@@ -198,8 +208,9 @@ void MainWindow::createTrayMenu()
 
 void MainWindow::showDialog()
 {
-    this->show();
+    this->showNormal();
     this->activateWindow();
+    traymode = false;
 }
 
 void MainWindow::showTrayMessage()
