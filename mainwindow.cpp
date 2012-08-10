@@ -23,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(readReply(QNetworkReply*)));
     connect(this,SIGNAL(loggedin()),this,SLOT(declareLoggedIN()));
     connect(this,SIGNAL(loggedOff()),this,SLOT(declareLoggedOFF()));
+    connect(ui->user_field,SIGNAL(returnPressed()),this,SLOT(login()));
+    connect(ui->pass_field,SIGNAL(returnPressed()),this,SLOT(login()));
 
     isLoggedin = false;
 
