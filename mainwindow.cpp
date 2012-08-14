@@ -115,6 +115,7 @@ void MainWindow::readReply(QNetworkReply *rply)
     } else {
         qDebug() << "error";
         QMessageBox::critical(this,"Error Occured", rply->errorString());
+        isLoggedin = false;
     }
 }
 
