@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QCloseEvent>
 #include <QEvent>
+#include <QSslError>
 #include "dialog.h"
 
 namespace Ui {
@@ -41,6 +42,7 @@ private slots:
     void callLogin();
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void checkConnection();
+    void onSslErrors(QNetworkReply* rply, QList<QSslError> errs);
 
 private:
     Ui::MainWindow *ui;

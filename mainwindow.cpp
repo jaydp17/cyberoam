@@ -14,13 +14,16 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowIcon(QIcon(":/cyb/icon.png"));
     this->setFixedSize(this->width(),this->height());
 
-    cyberoamURL.setUrl("http://10.100.56.55:8090/httpclient.html");
+    cyberoamURL.setUrl("https://10.100.56.55:8090/httpclient.html");
+    //cyberoamURL.setUrl("http://10.100.56.55:8090/httpclient.html");
 
     manager = new QNetworkAccessManager(this);
+
     req.setUrl(cyberoamURL);
     connect(ui->login_b,SIGNAL(clicked()),this,SLOT(login()));
 
     connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(readReply(QNetworkReply*)));
+    connect(manager,SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),SLOT(onSslErrors(QNetworkReply*,QList<QSslError>)));
     connect(this,SIGNAL(loggedin()),this,SLOT(declareLoggedIN()));
     connect(this,SIGNAL(loggedOff()),this,SLOT(declareLoggedOFF()));
     connect(ui->user_field,SIGNAL(returnPressed()),this,SLOT(login()));
@@ -113,7 +116,9 @@ void MainWindow::readReply(QNetworkReply *rply)
                 this->close();
         }
     } else {
-        qDebug() << "error";
+        QString response = QString::fromUtf8(rply->readAll());
+        qDebug() << response;
+        qDebug() << "error" << rply->errorString();
         QMessageBox::critical(this,"Error Occured", rply->errorString());
         isLoggedin = false;
     }
@@ -259,4 +264,11 @@ void MainWindow::checkConnection()
     }
     timeout.stop();
 
+}
+
+void MainWindow::onSslErrors(QNetworkReply *rply, QList<QSslError> errs)
+{
+    qDebug() << "ignored ssl";
+    rply->ignoreSslErrors();
+    rply->ignoreSslErrors(errs);
 }
