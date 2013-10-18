@@ -20,7 +20,7 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -49,7 +49,7 @@ private:
     QUrl cyberoamURL;
     QNetworkAccessManager *manager;
     QNetworkRequest req;
-    bool isLoggedin, traymode, wait4logout, supressMessage, gotReply;
+    bool isLoggedin, traymode, wait4logout, supressMessage, gotReply, firstTime;
 
     QSystemTrayIcon *tray;
     QMenu *trayMenu;

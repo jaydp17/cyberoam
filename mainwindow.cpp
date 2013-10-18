@@ -6,19 +6,19 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    firstTime(true)
 {
     ui->setupUi(this);
+
     ui->cyb_image->setPixmap(QPixmap::fromImage(QImage(":/cyb/webclientportallogo.png")));
     this->setWindowTitle("Cyberoam AutoLogin");
     this->setWindowIcon(QIcon(":/cyb/icon.png"));
     this->setFixedSize(this->width(),this->height());
 
     cyberoamURL.setUrl("https://10.100.56.55:8090/httpclient.html");
-    //cyberoamURL.setUrl("http://10.100.56.55:8090/httpclient.html");
 
     manager = new QNetworkAccessManager(this);
-
     req.setUrl(cyberoamURL);
     connect(ui->login_b,SIGNAL(clicked()),this,SLOT(login()));
 
@@ -55,6 +55,8 @@ MainWindow::MainWindow(QWidget *parent) :
     timeout.setInterval(5000);
     connect(&timeout,SIGNAL(timeout()),this,SLOT(checkConnection()));
 
+    if(uname != "")
+        callLogin();
 }
 
 MainWindow::~MainWindow()
@@ -69,7 +71,7 @@ void MainWindow::changeEvent(QEvent *ev)
             tray->show();
             traymode = true;
             QTimer::singleShot(250, this, SLOT(hide()));
-            QTimer::singleShot(600,this,SLOT(showTrayMessage()));
+            //QTimer::singleShot(600,this,SLOT(showTrayMessage()));
         }
 
         if(this->windowState() && !Qt::WindowMinimized){
@@ -116,9 +118,7 @@ void MainWindow::readReply(QNetworkReply *rply)
                 this->close();
         }
     } else {
-        QString response = QString::fromUtf8(rply->readAll());
-        qDebug() << response;
-        qDebug() << "error" << rply->errorString();
+        qDebug() << "error";
         QMessageBox::critical(this,"Error Occured", rply->errorString());
         isLoggedin = false;
     }
@@ -170,6 +170,10 @@ void MainWindow::login(bool timer)
 
 void MainWindow::declareLoggedIN()
 {
+    if(firstTime){
+        firstTime = false;
+        this->showMinimized();
+    }
     if(traymode && !supressMessage){
         tray->showMessage("Notification" , ui->user_field->text() + " successfully logged in");
     }
@@ -180,6 +184,7 @@ void MainWindow::declareLoggedIN()
 
     ui->user_field->setEnabled(false);
     ui->pass_field->setEnabled(false);
+    //createEntry();
 }
 
 void MainWindow::declareLoggedOFF()
@@ -270,5 +275,5 @@ void MainWindow::onSslErrors(QNetworkReply *rply, QList<QSslError> errs)
 {
     qDebug() << "ignored ssl";
     rply->ignoreSslErrors();
-    rply->ignoreSslErrors(errs);
+    //rply->ignoreSslErrors(errs);
 }
